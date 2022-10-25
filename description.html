@@ -1,0 +1,118 @@
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Aquarium Scene: Description</title>
+<style>
+      /* feel free to style the canvas any way you want. If you want it to
+      use the entire window, set width: 100% and height: 100%. */
+
+      canvas {
+          display: block;
+          margin: 10px auto;
+          width: 80%;
+          height: 500px;
+      }
+    </style>
+</head>
+
+<h1>Description of Final Project: Our Aquarium Scene, Spring 2021</h1>
+<h2>Project Created by Jessica Flores-Olguin & Tina Tarighian</h2>
+<body>
+<p>We created a room setting with textured mapped sides and objects including an interactive fish tank!
+</p>
+
+<h3>The scene we made is linked <a href="project.html">here</a>!
+</h3>
+<h2>Concepts that have been applied:</h2>
+1)<i> Texture Mapping </i><br>
+<Blockquote> The scaly body of the fish and a majority of the objects
+  (cabinet, pineapple, rock structure, the room sides, and the base of the table)
+  have been implemented with texture mapping!</Blockquote>
+  <div>
+  <img src="scene.png" alt="front view of our scene" height=400px>
+  <img src="birdview.png" alt="bird's eye view of our scene" height=400px>
+  <img src="sideView.png" alt="side view of our scene" height=400px>
+</div><br>
+2)<i> Composite Objects</i><br>
+<Blockquote>The fish are composite objects. There are two main
+    types of fish: fish with a top fin, and
+    fish with no top fin. There is a global array of colors
+    and a function to randomize the generation of these
+    composite objects and also allow for the randomization of fish textures. The widths and lengths are also
+    randomized with constraints (to ensure that the
+    fish are not too big or too small).
+</Blockquote>
+<Blockquote>
+  A majority of the objects in the scene are composite objects such as the treasure chest and coins, the pineapple
+  in the tank, and the coffee table.
+</Blockquote>
+
+<div>
+<img src="fish.png" alt="example of a randomly generated fish" height=300px>
+<img src="pinappleImage.png" alt="Screencapture of our pineapple cave" height=300px>
+<img src="closeChest.png" alt="Treasure chest with gold coins made with mesh MeshPhongMaterial" height=300px>
+</div><br>
+
+3)<i> Animation</i><br>
+<Blockquote>The fish are animated in different
+    directions in the screen. The bubbles are animated
+    in an upward motion to show air bubbles and give
+    the illusion of water. <br>
+</Blockquote>
+<div>
+<img src="fishAnimation.gif" alt="gif showing the fish movement" height=300px>
+</div><br>
+4)<i> Transparency</i><br>
+<Blockquote> Transparency is used for the glass material of the tank and coffee table top.
+  The bubbles and water texture are also transparent.</Blockquote>
+5)<i> User Interaction: Keyboardcallback controls</i><br>
+<Blockquote> Users are able to create a fish using "f". If the
+    user would like to make a fish with a top fin, they can press "t" then "f".
+    If the user would like to make a fish with no top fin, they can press "n" then "f".
+    In addtion, we added a GUI control for the spotlight pointing to the treasure chest inside the fish tank.
+</Blockquote>
+
+6)<i> Lighting</i><br>
+<Blockquote>The scene contains a directional light, ambient light, and GUI controlled spotlight. Pictured below shows the way the treasure chest looks like when the spot light above it is turned on and off.<br>
+</Blockquote>
+<div>
+<img src="withLight.png" alt="top view of treasure chest with spotLight on" height=300px>
+<img src="without.png" alt="top view of treasure chest with spotLight off" height=300px>
+</div><br>
+
+7)<i> Bezier Curve</i><br>
+<Blockquote>The tail and fin shapes are constructed with Bezier Curves. In addtion, the seaweed objects and rock object are constructed using TubeRadialGeometry.<br>
+</Blockquote>
+<div>
+<img src="rockArch.png" alt="rock object that uses bezier curves and TubeRadialGeometry" height=300px>
+<img src="tubular.png" alt="Screencapture the seaweed that uses tubular geometry" height=300px>
+</div><br>
+
+8)<i> Audio</i><br>
+<Blockquote>
+  Another way we decided to elevate the atmosphere of our scene was sound! We decided to go with some relaxing bubbly sounds that help highlight the animation in the tank.
+</Blockquote>
+
+
+<h2>Our Inspiration</h2>
+<p>
+We were quite inspired by this demo of a fish tank linked <a href="https://webglsamples.org/fishtank/fishtank.html">here</a>!
+</p>
+<div>
+<img src="tankEx.png" alt="screen capture of the Tank we were inspired from" height=300px>
+<img src="fishEx.png" alt="Screencapture the fish inside the tankwe were inspired from" height=300px>
+<img src="aquaLamp.jpeg" alt="Picture of an Aquarium Lamp" height=300px>
+</div>
+<p>
+We decided to try and make a fish tank to likeness of this example. We really liked the idea of allowing users to add fish into the tank. Similarly, we also were inspired from the aquarium lamps that are quite relaxing and pleasing to look at.
+As for the surround scenes, we were inspired by the flashy design patterns found in Art Deco (popular during the roaring 20s). We thought it was a fun combination and made our scene fun to look at.
+</p>
+<div>
+<img src="artDeco.jpeg" alt="sample of the wall texture we used" height=300px>
+<img src="redDeco.jpeg" alt="sample of the ceiling texture we used" height=300px>
+<img src="rug.jpeg" alt="sample of rug texture we used" height=300px>
+<img src="rug2.jpeg" alt="sample of floor texture we used" height=300px>
+</div>
+		</p>
+	</body>
+</html>

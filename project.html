@@ -1,0 +1,950 @@
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Final Project: Aquarium Scene</title>
+<style>
+      /* feel free to style the canvas any way you want. If you want it to
+      use the entire window, set width: 100% and height: 100%. */
+
+      canvas {
+          display: block;
+          margin: 10px auto;
+          width: 80%;
+          height: 500px;
+      }
+    </style>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
+</script>
+<!-- omit dat.gui and OrbitControls if you don't need them -->
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r80.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r80.min.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-sp21.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa18.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui.min.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/lectures-s21/TubeGeometryNew.js"></script>
+<script src="https://cs.wellesley.edu/~cs307/lectures-s21/TubeRadialGeometry.js"></script>
+
+</head>
+<body>
+<h1>Final Project: Aquarium Scene, Spring 2021</h1>
+<h2>By Jessica Flores-Olguin & Tina Tarighian</h2>
+<h3>The scene description  is linked <a href="description.html">here</a>!</h2>
+<script>
+// We always need a scene.
+var scene = new THREE.Scene();
+var renderer = new THREE.WebGLRenderer();
+
+TW.mainInit(renderer,scene);
+
+function createFish(params) {
+    /* Creates and returns the complete fish, a mesh, with many
+       attributes specified by params.  See fishParams for the
+       complete list. Contains smaller subfunctions that are
+       very similar to each other*/
+
+    var fish = new THREE.Object3D();
+    var body = createFishBody(params);
+
+        function createFin(params) {
+            var sd = params.sphereDetail;
+            var radius = 0.7;
+            var finGeometry = new THREE.SphereGeometry(radius,sd,sd);
+            var finMaterial = new THREE.MeshBasicMaterial({color: params.finColor });
+            var finMesh = new THREE.Mesh(finGeometry, finMaterial);
+            return finMesh;
+        }
+
+        function addFin(body,params) {
+            var finframe = new THREE.Object3D();
+            var fin = createFin(params);
+            fin.position.z = 1;
+            finframe.add(fin);
+            finframe.rotation.x = -1.5;
+            finframe.rotation.y = -0.2;
+            finframe.scale.z= 1.8;
+            body.add(finframe);
+            return body;
+        }
+
+    function createFishBody(params) {
+            var body = new THREE.Object3D();
+            var sd = params.sphereDetail;
+            var radius = params.headRadius;
+            var bodyGeometry = new THREE.SphereGeometry(radius, sd, sd);
+            var bodyMesh = new THREE.Mesh(bodyGeometry, mats[getRandomInt(7)]); //random material from array
+            body.add(bodyMesh);
+            body.scale.x = 1.7;
+            body.scale.y = 1.3;
+
+
+            if (params.finTrue == 1) {addFin(body, params)} ;
+            return body;
+        };
+    //assembling parts
+    fish.add(body);
+
+    fish.position.y = params.headRadius*(0.75)+ params.bodyRadius*3 +params.bodyRadius;    // moving fishframe to correct position
+
+    return fish;
+}
+
+function createTail(){
+            const x = 0, y = 0;
+            const tailShape = new THREE.Shape();
+
+            tailShape.bezierCurveTo( x + 3, y + 9, x + 4, y, x, y );
+            tailShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+            tailShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+            tailShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+            tailShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+            tailShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+
+            var tailGeom = new THREE.ShapeGeometry(tailShape);
+            var tailMaterial = new THREE.MeshBasicMaterial({color: fishParam.finColor, side: THREE.DoubleSide});
+            var tailMesh = new THREE.Mesh(tailGeom, tailMaterial);
+
+            return tailMesh;
+        }
+//====================================================================
+function createOrigin(){
+    // places yellow sphere at the origin of the scene, can be observed by hitting 'A' key
+        var origin = new THREE.Object3D();
+        var originGeometry = new THREE.SphereGeometry(0.25, 10, 10);
+        var originMaterial = new THREE.MeshBasicMaterial({color: 0xffff00}); //yellow
+        var originMesh = new THREE.Mesh(originGeometry, originMaterial);
+        origin.add(originMesh);
+        return origin;
+        }
+//====================================================================
+//CHANGE THESE PARAMS TO EASILY ALTER ATTRIBUTES
+var fishParam = {fishColor: 0xFF33FF,
+                fishTexture: 0,
+                finColor: 0x4DB3FF,
+                fishScale: 0,
+                sphereDetail: 10,
+                headRadius: 2,
+                bodyRadius: 2.5,
+                finTrue: 1,
+                tailRot: 0.2,
+                x: 0,
+                y: 0,
+                z: 0,
+                };
+// ====================================================================
+//function that returns a random element from an array
+function randomElt (inArray){
+    var randomInt = Math.floor(Math.random()*Math.floor(inArray.length));
+    return inArray[randomInt];}
+
+fishColors = [0x32ad5d, 0xad324b, 0x8032ad, 0xFF6633, 0xFFB399,
+                0xFF33FF, 0xFFFF99, 0x00B3E6, 0xff9a0d, 0xed2f62,
+                0xE6B333, 0x3366E6, 0x999966, 0x99FF99, 0xB34D4D,
+                0x80B300, 0x809900, 0xE6B3B3, 0x6680B3, 0x66991A,
+                0xFF99E6, 0xCCFF1A, 0xFF1A66, 0xE6331A, 0x33FFCC,
+                0x66994D, 0xB366CC, 0x4D8000, 0xB33300, 0xCC80CC,
+                0x66664D, 0x991AFF, 0xE666FF, 0x4DB3FF, 0x1AB399,
+                0xE666B3, 0x33991A, 0xCC9999, 0xB3B31A, 0x00E680,
+                0x4D8066, 0x809980, 0xE6FF80, 0x1AFF33, 0x999933,
+                0xFF3380, 0xCCCC00, 0x66E64D, 0x4D80CC, 0x9900B3,
+                0xE64D66, 0x4DB380, 0xFF4D4D, 0x99E6E6, 0x6666FF];
+
+
+//function that picks random color for the fish from the array
+function getColor (){
+    return randomElt(fishColors);
+    }
+
+// global variable to store array of image textures
+// ====================================================================
+var mats = [];
+var roomMat = [];
+var stone = [];
+var chestMat = [];
+var chestTopMat =[];
+var pinaMat = [];
+var groundMat =[];
+var cabMat =[];
+var woodMat =[];
+var waterMat = [];
+var rugMat= [];
+// load images for scales
+textures = ["scale1.jpg", "scale2.jpeg", "scale3.jpeg", "scale4.jpeg", "scale5.jpeg",
+            "scale6.jpeg", "scale7.jpeg",
+            "artDeco.jpeg","redDeco.jpeg","rug2.jpeg", "stone.jpeg", "chest.jpeg",
+            "pina.jpeg", "sand.jpeg", "wood.png", "cabinet.jpeg","water.jpeg","rug.jpeg"
+            ];
+TW.loadTextures(textures,
+    function (textures) {
+    //create an array of materials from these textures for the fish
+        textures[0].wrapS = THREE.RepeatWrapping;
+        textures[0].wrapT = THREE.RepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[0]}));
+        textures[1].wrapS = THREE.MirroredRepeatWrapping;
+        textures[1].wrapT = THREE.MirroredRepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[1]}));
+        textures[2].wrapS = THREE.MirroredRepeatWrapping;
+        textures[2].wrapT = THREE.MirroredRepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[2]}));
+        textures[3].wrapS = THREE.MirroredRepeatWrapping;
+        textures[3].wrapT = THREE.MirroredRepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[3]}));
+        textures[4].wrapS = THREE.MirroredRepeatWrapping;
+        textures[4].wrapT = THREE.MirroredRepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[4]}));
+        textures[5].wrapS = THREE.MirroredRepeatWrapping;
+        textures[5].wrapT = THREE.MirroredRepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[5]}));
+        textures[6].wrapS = THREE.RepeatWrapping;
+        textures[6].wrapT = THREE.RepeatWrapping;
+        mats.push(new THREE.MeshBasicMaterial({color: fishParam.fishColor, map: textures[6]}));
+
+        //room textures
+        //walls
+        textures[7].repeat.set(4,4);
+        textures[7].wrapS = THREE.RepeatWrapping;
+        textures[7].wrapT = THREE.RepeatWrapping;
+        roomMat.push(new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: textures[7],side: THREE.BackSide}));
+        roomMat.push(new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: textures[7],side: THREE.BackSide}));
+        // //ceiling
+        textures[8].repeat.set(4,4);
+        textures[8].wrapS = THREE.RepeatWrapping;
+        textures[8].wrapT = THREE.RepeatWrapping;
+        roomMat.push(new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: textures[8],side: THREE.BackSide}));
+        //carpet
+        textures[9].repeat.set(9,9);
+        textures[9].wrapS = THREE.RepeatWrapping;
+        textures[9].wrapT = THREE.RepeatWrapping;
+        roomMat.push(new THREE.MeshBasicMaterial({color:  0xFFFFFF, map: textures[9],side: THREE.BackSide}));
+        //front and back wall
+        //textures[7].repeat.set(9,9);
+        textures[7].wrapS = THREE.RepeatWrapping;
+        textures[7].wrapT = THREE.RepeatWrapping;
+        roomMat.push(new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: textures[7],side: THREE.BackSide}));
+        roomMat.push(new THREE.MeshBasicMaterial({color: 0xFFFFFF, map: textures[7],side: THREE.BackSide}));
+
+        //stone material
+        textures[10].wrapS = THREE.RepeatWrapping;
+        textures[10].wrapT = THREE.RepeatWrapping;
+        stone.push(new THREE.MeshLambertMaterial( { color: 0xa6a6a6, map: textures[10], side: THREE.DoubleSide} ));
+
+        //chest base material
+        textures[11].wrapS = THREE.RepeatWrapping;
+        textures[11].wrapT = THREE.RepeatWrapping;
+        chestMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        chestMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        chestMat.push(1); //keep open
+        chestMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        chestMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        chestMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        //for the top of chest
+        chestTopMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        chestTopMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        chestTopMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+        //wood
+        woodMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[11], side: THREE.DoubleSide} ));
+
+        textures[12].repeat.set(4,4);
+        textures[12].wrapS = THREE.RepeatWrapping;
+        textures[12].wrapT = THREE.RepeatWrapping;
+        textures[12].needsUpdate = true;
+        pinaMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[12], side: THREE.DoubleSide} ));
+
+        //ground
+        textures[13].repeat.set(20,10);
+        textures[13].wrapS = THREE.RepeatWrapping;
+        textures[13].wrapT = THREE.RepeatWrapping;
+        groundMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[13], side: THREE.DoubleSide} ));
+        groundMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[13], side: THREE.DoubleSide} ));
+        groundMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[13], side: THREE.DoubleSide} ));
+        groundMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[13], side: THREE.DoubleSide} ));
+        groundMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[13], side: THREE.DoubleSide} ));
+        groundMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[13], side: THREE.DoubleSide} ));
+
+        //cabinet material
+        textures[14].repeat.set(1,1);
+        textures[14].wrapS = THREE.RepeatWrapping;
+        textures[14].wrapT = THREE.RepeatWrapping;
+        cabMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[14], side: THREE.DoubleSide} ));
+        cabMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[14], side: THREE.DoubleSide} ));
+        cabMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[14], side: THREE.DoubleSide} ));
+        cabMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[14], side: THREE.DoubleSide} ));
+        textures[15].repeat.set(4,1);
+        textures[15].wrapS = THREE.RepeatWrapping;
+        textures[15].wrapT = THREE.RepeatWrapping;
+        cabMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[15], side: THREE.DoubleSide} ));
+        cabMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[14], side: THREE.DoubleSide} ));
+        //water
+        textures[16].repeat.set(4,1);
+        textures[16].wrapS = THREE.RepeatWrapping;
+        textures[16].wrapT = THREE.RepeatWrapping;
+        waterMat.push(new THREE.MeshPhongMaterial( { color: 0xFFFFFFF, map: textures[16],
+                                            side: THREE.DoubleSide,transparent: true,
+                                            opacity: 0.35,shininess: 70} ));
+        //rug
+        textures[17].repeat.set(2,2);
+        textures[17].needsUpdate = true;
+        textures[17].wrapS = THREE.RepeatWrapping;
+        textures[17].wrapT = THREE.RepeatWrapping;
+        rugMat.push(new THREE.MeshLambertMaterial( { color: 0xFFFFFFF, map: textures[17], side: THREE.DoubleSide} ));
+                });
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+var mapNum;
+function getRandomTexture(){
+  mapNum = getRandomInt(7);
+}
+
+// ====================================================================
+var origin = createOrigin();
+
+scene.add(origin);
+
+//====================================================================
+function addSeaweed(){
+    n=0
+    while (n!=250) {
+        //randomize the green (30-50) to get different range of blue and green
+        var color = 0x275e30 + Math.floor(Math.random() * 20);
+        var material = new THREE.MeshLambertMaterial( { color: color} );
+        material.side = THREE.DoubleSide;
+
+        var bezierCurve = new THREE.CubicBezierCurve3(
+                          new THREE.Vector3(6,-3,-5),
+                          new THREE.Vector3(6,0,-5),
+                          new THREE.Vector3(6,5,-5),
+                          new THREE.Vector3(6,7,-5)
+        );
+
+        //radius thickness
+        var radii = [1,.75,.75,.5,.5,.25,.25];
+
+        //build the seaweed
+        var geom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 11, false);
+        var seaweed = new THREE.Mesh(geom, material);
+
+        //randomize where it can be on the X axis, but it should always stay at the bottom (constant y)
+        var rand1 = randomElt([1, -1]);
+        var rand2 = randomElt([1, -1]);
+        var xcord = Math.floor(Math.random() * 60) * rand1;
+        var ycord = -5;
+        var zcord = Math.floor(Math.random() * 20) * rand2;
+        seaweed.position.set(xcord,ycord, zcord);
+        scene.add(seaweed);
+        n++;
+    }
+}
+
+
+// ====================================================================
+
+//SET THE PARAMETERS
+function createMoreNoFin(){
+    fishParam.finTrue = 0;}
+
+function createMoreTopFin(){
+    fishParam.finTrue = 1;}
+
+// parameters related to animation
+var params = {
+    dx: 0.5,         // object position change between frames
+    da: Math.PI/50,  // tail angle change between frames
+    dy: 1, //randomized speed of bubble
+};
+
+
+// arrays to store pointers to the top-level fish and tail
+// within these objects, to enable easy updating for the animation
+var fishArr = [];
+var tailArr = [];
+var bubbArr = [];
+var dxArr = [];
+var dyArr = [];
+var daArr = [];
+
+// add a new object to the array of objects
+function addObject () {
+
+    //get random colors and store them
+    var randombodyColor = getColor();
+    var randomfinColor = getColor();
+    //var fishTexture = getRandomTexture();
+
+    fishParam.fishColor = randombodyColor;
+    fishParam.finColor = randomfinColor;
+    //fishParam.fishTexture = mats[fishTexture];
+
+    var body = new THREE.Object3D();
+    var bodMesh = createFish(fishParam);
+    bodMesh.position.y = 5;
+    body.add(bodMesh);
+    // place tail inside fish to enable rotation around tip of cone
+    var tailFrame = new THREE.Object3D();
+    var tail = createTail();
+    tail.scale.set(0.2,0.2,0.2);
+    tail.position.y = 6;
+    tail.position.x= -5;
+
+    tail.rotation.z = Math.PI * -0.5 ;
+    tailFrame.add(tail);
+    body.add(tailFrame);
+
+   // add new fish to the scene at a random position
+    var RS = Math.random() + Math.floor(Math.random() * 4)+2;
+    var rand1 = randomElt([1, -1]);
+    var rand2 = randomElt([1, -1]);
+    var rot = randomElt([0,1]);
+
+    fishParam.x = Math.floor(Math.random() * 100) * rand1;
+    fishParam.y = Math.floor(Math.random() * 30);
+    fishParam.z = Math.floor(Math.random(0,20) * 10) * rand2;
+
+    //set position and scale (randomized)
+    body.position.set(fishParam.x, fishParam.y, fishParam.z);
+    if (RS >0.1) { body.scale.set(RS, RS, RS); }
+
+    body.rotation.y = Math.PI * rot;
+
+    scene.add(body);
+    TW.render();
+   // push onto respective arrays
+    fishArr.push(body);
+    tailArr.push(tailFrame);
+
+   // assign initial left/right direction of movement
+    if (rot == 0) {
+        dxArr.push(params.dx);
+    } else {
+        dxArr.push(-params.dx);
+    }
+
+    // and clockwise/counterclockwise direction of tail rotation
+    if (Math.random() > 0.3) {
+        daArr.push(params.da);
+    } else {
+        daArr.push(-params.da);
+    }
+
+}
+// ====================================================================
+//create bubbles
+function addBubbles (){
+    params.dy = Math.floor(Math.random() * 5)+1;
+    var rand1 = randomElt([1, -1]);
+    //var rand2 = randomElt([1, -1]);
+    var rand3 = randomElt([1, -1]);
+    var xcord = Math.floor(Math.random() * 95) * rand1;
+    var ycord = Math.floor(Math.random() * 70);
+    var zcord = Math.floor(Math.random() * 30) * rand3;
+    var geometry = new THREE.SphereGeometry( Math.random(.4, 6), 32 );
+    var material = new THREE.MeshBasicMaterial( { color: 0xccdfff,
+                                                  side: THREE.DoubleSide,
+                                                  transparent: true,
+                                                  opacity: 0.35 } );
+    var bubble = new THREE.Mesh( geometry, material );
+    bubble.position.set(xcord, ycord, zcord);
+    scene.add(bubble);
+    //push the object onto array
+    bubbArr.push(bubble);
+    dyArr.push(params.dy);
+};
+
+//have bubbles initially in the scene
+function initBubbles () {
+   n=0
+    while (n!=1000) {
+      addBubbles();
+      n++;
+   }
+   TW.render();
+
+}
+initBubbles();
+
+// ====================================================================
+// update the scene for the next frame of the animation
+
+function update() {
+    for (var i = 0; i < fishArr.length; i++) {
+        fishArr[i].position.x += dxArr[i];
+       // if imaginary walls on left or right are reached, change direction
+       // of motion and flip object upside down
+       if (fishArr[i].position.x > 100 || fishArr[i].position.x < -100) {
+           dxArr[i] = -dxArr[i];
+           fishArr[i].rotation.y += Math.PI;
+       }
+       // rotate the cone by the associated angle change -
+       // is reached, change direction of rotation
+       tailArr[i].rotation.y += daArr[i];
+       if (tailArr[i].rotation.y > Math.PI/5 || tailArr[i].rotation.y < -Math.PI/5) {
+           daArr[i] = -daArr[i];
+       }
+    }
+    for (var i = 0; i < bubbArr.length; i++) {
+       //bubbles moving up y
+       bubbArr[i].position.y += dyArr[i];
+        // if imaginary walls on the top are reached, start over at bottom
+        if (bubbArr[i].position.y > 70 ) {
+            bubbArr[i].position.y = 2;
+            dyArr[i] = -dyArr[i]; }
+        if (bubbArr[i].position.y < 1 ) {
+            dyArr[i] = -dyArr[i]; }
+
+    }
+}
+
+// performs one step of the animation
+function oneStep() {
+    update();
+    TW.render();
+}
+
+// starts continuous animation loop
+var id;
+
+function animate() {
+    oneStep();
+    id = requestAnimationFrame(animate);
+}
+
+// stops animation
+function stopAnimation() {
+   if (id != null) {
+       cancelAnimationFrame(id);
+   }
+}
+
+addSeaweed();
+animate();
+// ====================================================================
+//create tresure chest
+// materials for the gold coins and dome for light
+
+var gold = new THREE.MeshPhongMaterial( {color: new THREE.Color("goldenrod"),
+                                                    specular: new THREE.Color("white"),
+                                                    shininess: 30,
+                                                    flatShading: THREE.SmoothShading} ) ;
+var gold2 = new THREE.MeshPhongMaterial( {color: new THREE.Color("goldenrod"),
+                                                    specular: new THREE.Color("white"),
+                                                    shininess: 30
+                                                    } ) ;
+
+var parameters = {
+    coneRadius: 10,
+    coneHeight: 25,
+    sconcePosX: 75,
+    sconcePosY: 110,
+    sconcePosZ: -10,
+}
+
+function makeSconce(){
+    var sconce = new THREE.Object3D();
+
+    var sconceGeom = new THREE.ConeGeometry(parameters.coneRadius, parameters.coneHeight, 40, 1, openEnded = true);
+
+    var sconceMesh = new THREE.Mesh(sconceGeom, gold2);
+    sconce.add(sconceMesh);
+
+    var stringGeom = new THREE.CylinderGeometry(1.25,1.25,28,32,32);
+    var stringMaterial = new THREE.MeshPhongMaterial( {color: 0x0000,
+                                                         side: THREE.DoubleSide
+                                                         } );
+    var string = new THREE.Mesh(stringGeom, stringMaterial);
+    string.position.set(0,9+14,0);
+    sconce.add(string);
+
+
+    var domeGeom = new THREE.SphereGeometry(5,15,15,0,-Math.PI);
+    var dome = new THREE.Mesh( new THREE.SphereGeometry(5,15,15,0,-Math.PI), gold2);
+
+    var fy = 9+32; //readjust the foot in relation to the leg length
+    dome.position.set(0,fy,0);
+    dome.rotation.set(-Math.PI/2,0,0);
+
+    sconce.add(dome)
+
+    sconce.position.set(parameters.sconcePosX, parameters.sconcePosY, parameters.sconcePosZ);
+
+    scene.add(sconce);
+
+}
+
+function updateSpotlight(){
+    lampLight.visible = guiParams.spotLightOn;
+    TW.render();
+
+}
+
+/*creates and adds the upper and lower spotlights to the scene.
+Takes in distance as a parameter to specify the target location*/
+function addSpotLight(distance){
+
+    var spotLight = new THREE.SpotLight(parameters.lightColor, 1, 0, Math.PI/6, 0, 1);
+
+    //position the spotlight at the tips of the cones (origin of the sconce)
+    spotLight.position.set(parameters.sconcePosX, parameters.sconcePosY, parameters.sconcePosZ);
+
+    var target = new THREE.Object3D();
+    //position the target at the ceiling (for upper spotlight) or floor (for lower spotlight)
+    target.position.set(parameters.sconcePosX, distance+110, parameters.sconcePosZ);
+    spotLight.target = target;
+
+    //add spotlight and spotlight target to the scene
+    scene.add(spotLight);
+    scene.add(spotLight.target);
+
+    return spotLight;
+}
+makeSconce();
+var lampLight = addSpotLight(-10);
+
+var dirLight;
+function addDirectionalLighting(){
+    dirLight = new THREE.DirectionalLight(0x808080, 1);
+    dirLight.position.set(40, 30, 40);
+    scene.add(dirLight);
+    TW.render();
+}
+//add the directional light
+addDirectionalLighting();
+// create ambient light and add to the scene
+var ambLight = new THREE.AmbientLight(0x808080);
+scene.add(ambLight);
+
+//====================================================================
+//create the room
+var roomGeom = new THREE.BoxGeometry(300,300,300);
+var roomMesh = new THREE.Mesh(roomGeom, roomMat);
+roomMesh.position.set(0,0,120);
+
+scene.add(roomMesh);
+//====================================================================
+//create rug
+var rug = new THREE.Mesh(new THREE.PlaneGeometry(170, 195),rugMat);
+rug.position.set(0, -149,140);
+rug.rotation.set(Math.PI/2,0, 0);
+scene.add(rug);
+
+//====================================================================
+//create the sand
+var sandGeom = new THREE.BoxGeometry( 230, 15, 50 );
+var sandMaterial = new THREE.MeshBasicMaterial({color:0xf2d2a9})
+var sand = new THREE.Mesh( sandGeom, groundMat);
+sand.position.set(0, -15, 0);
+scene.add( sand );
+//====================================================================
+
+//create the stone arch inside tank
+var archCurve = new THREE.CubicBezierCurve3(
+   new THREE.Vector3(-30,0,0),
+   new THREE.Vector3(-20,80,0),
+   new THREE.Vector3(20,80,0),
+   new THREE.Vector3(30,0,0)
+);
+// create a pattern of radii that increase and then decrease in size
+var archRadii = [10,5,6,4,6,4,5,3,10];
+var archColor = 0xa6a6a6;
+
+// create the tube geometry using the Bezier curve and radii
+var archGeom = new THREE.TubeRadialGeometry(archCurve, 32, archRadii, 16, false);
+var arch = new THREE.Mesh(archGeom, stone);
+arch.position.set(-20,-13,0);
+arch.rotation.set(0, Math.PI/6, 0);
+scene.add(arch);
+//====================================================================
+
+//create tank
+var tank = new THREE.Object3D();
+var tankGeom = new THREE.BoxGeometry( 230.5, 100, 50.5 );
+
+//glass material
+var tankMaterial = new THREE.MeshPhongMaterial({color:0x9dc1fc,
+                                                side: THREE.DoubleSide,
+                                                transparent: true,
+                                                opacity: 0.35,
+                                                shininess: 70});
+
+var tankMatArray = [];
+//I tried to make this into for loop but the dev tools disconnected via chrome
+tankMatArray.push(tankMaterial);
+tankMatArray.push(tankMaterial);
+tankMatArray.push(0);
+tankMatArray.push(tankMaterial);
+tankMatArray.push(tankMaterial);
+tankMatArray.push(tankMaterial);
+
+var tankObj = new THREE.Mesh( tankGeom, tankMatArray );
+tankObj.position.set(0, 35, 0);
+tank.add(tankObj); //add to tank
+
+var water = new THREE.Mesh(new THREE.PlaneGeometry(230, 50),waterMat);
+water.position.set(0, 75,0)
+water.rotation.set(Math.PI/2,0, 0);
+tank.add(water)
+
+var tankBaseGeom = new THREE.BoxGeometry( 235, 35, 55 );
+var tankBaseMaterial = new THREE.MeshPhongMaterial({color:0x0000,
+                                                    side: THREE.DoubleSide,
+                                                 })
+var tankBase = new THREE.Mesh( tankBaseGeom, tankBaseMaterial );
+tankBase.position.set(0, -30, 0);
+tank.add(tankBase);
+tank.position.set(0,-10,0);
+scene.add( tank);
+//====================================================================
+//create the cabinet
+var cabinetGeom = new THREE.BoxGeometry( 250, 98, 60 );
+var cabinet = new THREE.Mesh(cabinetGeom, cabMat);
+cabinet.position.set(0,-103,0);
+scene.add(cabinet);
+
+//====================================================================
+
+// addTreasure() function adds gold and chest
+function addTreasure() {
+    var treasure = new THREE.Object3D();
+    var chestBaseGeom = new THREE.BoxGeometry( 20, 10,10 );
+    var chestBaseMesh = new THREE.Mesh( chestBaseGeom, chestMat );
+    treasure.add(chestBaseMesh);
+
+    var chestTopGeom = new THREE.CylinderGeometry(5,5, 20,8, 1, false, 0, Math.PI);
+    var chestTopMesh = new THREE.Mesh( chestTopGeom, chestTopMat );
+
+
+    //open
+    chestTopMesh.rotation.set(-Math.PI/2,0,Math.PI/2);
+    chestTopMesh.position.set(0,10,-5)
+    //add top to chest
+    treasure.add(chestTopMesh);
+
+    //number of coins counter
+    var n = 0;
+    // golden cylinder
+    while (n <250){
+        //create gold coin
+        var coin = new THREE.Mesh(new THREE.CylinderGeometry(1,1,1/2, 16, 1, false),
+                                          gold);
+        //randomize where it can be on the X axis,
+        var rand1 = randomElt([1, -1]);
+        var rand2 = randomElt([1, -1]);
+        var xcord = getRandomInt(9.5) *rand1;
+        var ycord = Math.random(6)+5;
+        var zcord = getRandomInt(4.5) *rand2;
+        coin.position.set(xcord,ycord, zcord);
+        var rotate = getRandomInt(4);
+        if (rotate == 1){
+          coin.rotation.set(Math.PI/6,0, 0);
+        }
+        else if (rotate == 2){
+          coin.rotation.set(0,Math.PI/6, 0);
+        }
+        else if (rotate == 3){
+          coin.rotation.set(0, 0,Math.PI/6);
+        }else{
+          coin.rotation.set(0,0, 0);
+        }
+        treasure.add(coin);
+        n++;
+    }
+    n=0;
+    //add coins around perimeter
+    while (n <150){
+        //create gold coin
+        var coin = new THREE.Mesh(new THREE.CylinderGeometry(1,1,1/2, 16, 1, false),
+                                          gold);
+        //randomize around the chest
+        var rand1 = randomElt([1, -1]);
+        var rand2 = randomElt([1, -1]);
+        var xcord = getRandomInt(10.5)+3;
+        var ycord = Math.random(4)-5;
+        var zcord =getRandomInt(10.5)+5;
+        coin.position.set(xcord,ycord, zcord);
+        var rotate = getRandomInt(4);
+        if (rotate == 1){
+          coin.rotation.set(Math.PI/6,0, 0);
+        }
+        else if (rotate == 2){
+          coin.rotation.set(0,Math.PI/6, 0);
+        }
+        else if (rotate == 3){
+          coin.rotation.set(0, 0,Math.PI/6);
+        }else{
+          coin.rotation.set(0,0, 0);
+        }
+        treasure.add(coin);
+        n++;
+    }
+    treasure.position.set(75, -3, -10);
+    treasure.rotation.set(0,-Math.PI/6,0);
+    scene.add(treasure);
+}
+
+addTreasure();
+//====================================================================
+//adds pina to tank
+function addPinapple(){
+  var pina = new THREE.Object3D();
+  //create pinapple shape
+  var pinapple = new THREE.Mesh(new THREE.SphereGeometry(8,32,32,0,5.4,3,2.5),
+                                    pinaMat);
+  pinapple.scale.set(2.5, 6,2.5);
+  pinapple.rotation.set(Math.PI,Math.PI/8,0)
+  pina.add(pinapple);
+
+  //add the leaves
+  var bunch = new THREE.Object3D();
+  var degree = Math.PI/6;
+  var leafMat = new THREE.MeshLambertMaterial({color:0x275e30, side: THREE.DoubleSide});
+  var leaf1 = new THREE.Mesh(new THREE.ConeGeometry(3,12, 32,32), leafMat);
+  leaf1.rotation.set(0, 0, Math.PI/6);
+  leaf1.position.set(-4, 53, 0);
+  leaf1.scale.set(.5,1,1);
+  bunch.add(leaf1);
+  var leaf2 = new THREE.Mesh(new THREE.ConeGeometry(3,12, 32,32), leafMat);
+  leaf2.rotation.set(0 ,0,-Math.PI/6);
+  leaf2.position.set(4, 53, 0); //y is 53
+  leaf2.scale.set(.5,1,1);
+  bunch.add(leaf2);
+
+  var bunch1 = bunch.clone();
+
+  var bunch2 = bunch.clone();
+  bunch2.rotation.set(0,Math.PI/4,0);
+
+  var bunch3 = bunch.clone();
+  bunch3.rotation.set(0,Math.PI/2,0);
+
+  var bunch4 = bunch.clone();
+  bunch4.rotation.set(0,-Math.PI/4,0);
+
+
+  pina.add(bunch1);
+  pina.add(bunch2);
+  pina.add(bunch3);
+  pina.add(bunch4);
+
+  pina.position.set(-85,-3,5);
+  scene.add(pina);
+}
+addPinapple();
+//====================================================================
+function addTable(){
+
+  var table = new THREE.Object3D();
+  var topGeom = new THREE.CylinderGeometry(75,75, 4,32,32);
+  var topGlass = new THREE.Mesh(topGeom, tankMaterial);
+  topGlass.position.set(0,60,0);
+  topGlass.scale.set(1,1,0.5);
+  table.add(topGlass);
+
+  var stand = new THREE.Object3D();
+
+  var standGeom = new THREE.CylinderGeometry(25,25,4,32,32);
+  var standMesh = new THREE.Mesh(standGeom, chestTopMat);
+  standMesh.position.set(0,56,0);
+  stand.add(standMesh);
+
+  var standGeom2 = new THREE.CylinderGeometry(25,25,4,32,32);
+  var standMesh2 = new THREE.Mesh(standGeom2, chestTopMat);
+  standMesh2.position.set(0,4,0);
+  stand.add(standMesh2);
+
+  var sides = Math.sqrt(50)*2;
+  var standGeom3 = new THREE.SphereGeometry(25,32,32);//new THREE.BoxGeometry(sides,sides,sides);
+  var standMesh3 = new THREE.Mesh(standGeom3, woodMat);
+  standMesh3.position.set(0,30,0);
+  standMesh3.rotation.set(Math.PI/4,0,Math.PI/4);
+  stand.add(standMesh3);
+  table.add(stand);
+
+  //chairs
+  var chair1 = stand.clone();
+  chair1.position.set(-75, 0, 55);
+  var chair2 = stand.clone();
+  chair2.position.set(75, 0, 55);
+
+  table.add(chair1);
+  table.add(chair2);
+  table.position.set(0,-150,140);
+  scene.add(table);
+
+}
+addTable();
+//====================================================================
+//AUDIO
+// create a camera
+var camera = new THREE.PerspectiveCamera();
+scene.add( camera );
+
+ // create an AudioListener and add it to the camera
+const listener = new THREE.AudioListener();
+camera.add( listener );
+
+// create a global audio source
+const sound = new THREE.Audio( listener );
+
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+
+// Callback function to start the music
+function startSounds() {
+    audioLoader.load( 'underwatersound.flac', function( buffer ) {
+    sound.setBuffer( buffer );
+    sound.setVolume( 0.5);
+    sound.setLoop( true );
+    sound.play();
+    },
+// Progress callback
+function ( xhr ) {
+    console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+    },
+// Error callback
+    function ( err ) {
+        console.log( 'An error with the music has occurred' );
+        }
+        );
+    }
+
+TW.render();
+
+renderer.setClearColor( 0x9dc1fc );
+//
+TW.cameraSetup(renderer,
+               scene,
+               {minx: -50, maxx: 50,
+                miny: -50, maxy: 50,
+                minz: -300, maxz: 100});
+
+
+var gui = new dat.GUI();
+
+guiParams = {
+  ambientOn: true,
+  directionalOn: true,
+  spotLightOn: true
+}
+
+gui.add(guiParams, "spotLightOn").onChange(updateSpotlight);
+TW.setKeyboardCallback("s", stopAnimation, "stop animation");
+TW.setKeyboardCallback("g", animate, "start animation");
+TW.setKeyboardCallback("f", addObject, "add fish");
+TW.setKeyboardCallback("t", createMoreTopFin, "fish with TOP FIN");
+TW.setKeyboardCallback("n", createMoreNoFin, "fish with NO TOP FIN");
+TW.setKeyboardCallback('p', startSounds, "bubble sounds");
+
+
+</script>
+<p> To add fish with top fins, press "t" then "f".</p>
+<p> To add fish with no top fins, press "n" then "f".</p>
+<p> To continue animation, press "g".</p>
+<p> To stop the animation, press "s".</p>
+<p> To hear the bubbles of the fish tank press "p".</p>
